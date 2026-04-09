@@ -27,10 +27,10 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // --- 3. STATIC FOLDER ---
 app.use('/uploads', express.static(uploadDir));
 
-// --- 4. MONGODB CONNECTION (🔥 FIXED) ---
+// --- 4. MONGODB CONNECTION ( FIXED) ---
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB Error:", err));
+  .then(() => console.log(" MongoDB Connected"))
+  .catch(err => console.error(" MongoDB Error:", err));
 
 // --- 5. ROUTES ---
 app.use('/api/admin', require('./routes/adminRoutes'));
@@ -54,5 +54,5 @@ app.use((err, req, res, next) => {
 // --- 8. SERVER START ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(` Server running on port ${PORT}`);
 });
