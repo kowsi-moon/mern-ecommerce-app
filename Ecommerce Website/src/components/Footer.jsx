@@ -51,7 +51,7 @@ const Footer = () => {
         {/* Bottom Border & Copyright */}
         <div className="border-t border-white/10 pt-8 flex justify-center items-center">
           <p className="text-[11px] text-gray-400 tracking-wider">
-            © 2024 Verdant. All rights reserved.
+            © 2026 Luxora. All rights reserved.
           </p>
         </div>
       </div>

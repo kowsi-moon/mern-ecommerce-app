@@ -1,38 +1,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch } from 'react-icons/fi';
+import { ChevronLeft, ChevronRight } from 'lucide-react'; 
 
 const Shop = ({ products = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
 
-  const categories = ['All', 'Electronics', 'Clothing', 'Home & Kitchen', 'Sports', 'Books', 'Accessories',"Gadgets",];
+  const productsPerPage = 12; 
+  const categories = ['All', 'Electronics', 'Clothing', 'Home & Kitchen', 'Sports', 'Books', 'Accessories', "Gadgets",];
 
-  // ---  IMPROVED IMAGE LOGIC ---
   const getImageUrl = (path) => {
     if (!path) return 'https://placehold.co/400x500?text=No+Image';
-    
-    // 1. Base64 string-ah irundha direct-ah return pannu
     if (path.startsWith('data:image')) return path;
-    
-    // 2. Full HTTP URL-ah irundha adhaiye return pannu
     if (path.startsWith('http')) return path;
-    
-    // 3. Local path-ah irundha clean panni backend URL seru
     const cleanPath = path.replace(/\\/g, '/').replace(/^\/+/, '');
-    
-    // Check if 'uploads/' is already in the string to avoid 'uploads/uploads'
     const finalPath = cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`;
-    
     return `http://localhost:5000/${finalPath}`;
   };
 
+  // Filter Logic
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // --- PAGINATION LOGIC ---
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  };
 
   return (
     <div className="bg-[#FDFBF7] min-h-screen pt-28 px-6 pb-20 font-sans">
@@ -45,7 +50,10 @@ const Shop = ({ products = [] }) => {
             {categories.map(cat => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setCurrentPage(1); 
+                }}
                 className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
                   selectedCategory === cat 
                   ? 'bg-[#1F3E35] text-white shadow-lg' 
@@ -62,19 +70,20 @@ const Shop = ({ products = [] }) => {
               type="text"
               placeholder="Search products..."
               className="w-full bg-white border border-gray-100 rounded-lg py-3 pl-10 pr-4 outline-none focus:border-[#1F3E35] shadow-sm text-sm"
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
             />
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
         </div>
 
-        <p className="text-gray-500 text-xs mb-8 italic tracking-widest uppercase">
-          {filteredProducts.length} products found
-        </p>
+        
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-          {filteredProducts.map((product) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 mb-16">
+          {currentProducts.map((product) => {
             const finalImage = getImageUrl(product.imageUrl || product.image);
 
             return (
@@ -88,7 +97,6 @@ const Shop = ({ products = [] }) => {
                     src={finalImage} 
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    // CrossOrigin removed for Base64 compatibility issues
                     onError={(e) => { 
                       if (e.target.src !== 'https://placehold.co/400x500?text=Error') {
                         e.target.src = 'https://placehold.co/400x500?text=Error';
@@ -109,6 +117,43 @@ const Shop = ({ products = [] }) => {
             );
           })}
         </div>
+
+        {/* --- PAGINATION CONTROLS --- */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-12 border-t border-gray-100 pt-10">
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-full transition-all ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-[#1F3E35] hover:bg-gray-100'}`}
+            >
+              <ChevronLeft size={24} />
+            </button>
+
+            <div className="flex gap-2">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => paginate(i + 1)}
+                  className={`w-10 h-10 rounded-full text-xs font-bold transition-all ${
+                    currentPage === i + 1 
+                    ? 'bg-[#1F3E35] text-white shadow-md' 
+                    : 'text-gray-400 hover:text-[#1F3E35] hover:bg-gray-50'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-full transition-all ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-[#1F3E35] hover:bg-gray-100'}`}
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
