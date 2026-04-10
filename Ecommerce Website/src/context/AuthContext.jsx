@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // App load aagum podhu redirect 
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,12 +16,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  
   const login = (userData, token) => {
-    const fullUserData = { ...userData, token };
-    setUser(fullUserData);
-    localStorage.setItem('user', JSON.stringify(fullUserData));
-   
+  const fullUserData = { ...userData, token }; 
+  setUser(fullUserData);
+  localStorage.setItem('user', JSON.stringify(fullUserData));
+};
+
+  // --- NEW: Update User Function ---
+  const updateUser = (newDetails) => {
+    const updatedUser = { ...user, ...newDetails };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const logout = () => {
@@ -31,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

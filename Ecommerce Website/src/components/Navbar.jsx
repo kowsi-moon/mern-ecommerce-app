@@ -1,27 +1,29 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FiSearch, FiShoppingCart, FiUser, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
+import { NavLink, Link } from 'react-router-dom'; // NavLink-ah import pannikonga
+import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false); // Mobile menu open state
-  
+  const [isOpen, setIsOpen] = useState(false);
+
   const context = useCart();
-  const cart = context?.cart || []; 
+  const cart = context?.cart || [];
   const cartItemCount = cart.reduce((total, item) => total + (item.quantity || 0), 0);
+
+  // Active Link-kaga oru common style function
+  const activeLinkStyle = ({ isActive }) => 
+    isActive 
+      ? "text-amber-600 border-b-2 border-amber-600 pb-1 transition-all duration-200" 
+      : "hover:text-amber-600 transition-colors";
 
   return (
     <nav className="bg-[#FDFBF7] border-b border-gray-100 sticky top-0 z-50">
-      {/* --- Main Navbar Container --- */}
       <div className="flex items-center justify-between px-4 md:px-10 py-4 max-w-7xl mx-auto">
         
-        {/* Mobile Menu Icon (Hamburger) - Only shows on mobile */}
-        <button 
-          className="md:hidden text-[#1F3E35]"
-          onClick={() => setIsOpen(!isOpen)}
-        >
+        {/* Mobile Menu Icon */}
+        <button className="md:hidden text-[#1F3E35]" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
         </button>
 
@@ -32,17 +34,17 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Desktop Navigation Links - Hidden on Mobile */}
+        {/* Desktop Navigation - NavLink use pannirukken */}
         <div className="hidden md:flex items-center gap-8 text-[#1F3E35] font-medium">
-          <Link to="/" className="hover:text-amber-600 transition-colors">Home</Link>
-          <Link to="/shop" className="hover:text-amber-600 transition-colors">Shop</Link>
+          <NavLink to="/" className={activeLinkStyle}>Home</NavLink>
+          <NavLink to="/shop" className={activeLinkStyle}>Shop</NavLink>
+          <NavLink to="/category" className={activeLinkStyle}>Category</NavLink>
+          <NavLink to="/deals" className={activeLinkStyle}>Deals</NavLink>
+          <NavLink to="/about" className={activeLinkStyle}>About Luxora</NavLink>
         </div>
 
         {/* Action Icons */}
         <div className="flex items-center gap-4 md:gap-6 text-[#1F3E35]">
-          <FiSearch size={20} className="hidden sm:block cursor-pointer hover:text-amber-600" />
-          
-          {/* Cart Icon */}
           <Link to="/cart" className="relative group">
             <FiShoppingCart size={20} className="group-hover:text-amber-600 transition-colors" />
             {cartItemCount > 0 && (
@@ -52,46 +54,49 @@ const Navbar = () => {
             )}
           </Link>
 
-          {/* User Section (Desktop) */}
+          <Link to="/shop">
+            <FiSearch size={20} className="hidden sm:block cursor-pointer hover:text-amber-600" />
+          </Link>
+
           <div className="hidden md:flex items-center gap-4">
             {user ? (
-              <div className="flex items-center gap-4">
-                <Link to={user.isAdmin ? "/admin/dashboard" : "/profile"} className="flex items-center gap-2 font-bold hover:text-amber-600">
+              <NavLink to={user.isAdmin ? "/admin/dashboard" : "/profile"} className={activeLinkStyle}>
+                <div className="flex items-center gap-2 font-bold">
                   <FiUser size={20} />
                   <span className="text-sm">{user.isAdmin ? "Dashboard" : `Hi, ${user.name?.split(' ')[0]}`}</span>
-                </Link>
-                <button onClick={logout} className="hover:text-red-600 transition-colors">
-                  <FiLogOut size={20} />
-                </button>
-              </div>
+                </div>
+              </NavLink>
             ) : (
-              <Link to="/login" className="flex items-center gap-2 font-bold hover:text-amber-600">
-                <FiUser size={20} />
-                <span>Login</span>
-              </Link>
+              <NavLink to="/login" className={activeLinkStyle}>
+                <div className="flex items-center gap-2 font-bold">
+                  <FiUser size={20} />
+                  <span>Login</span>
+                </div>
+              </NavLink>
             )}
           </div>
         </div>
       </div>
 
-      {/* --- Mobile Menu Dropdown --- */}
+      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white border-b border-gray-100 px-6 py-4 flex flex-col gap-4 animate-fade-in-down">
-          <Link to="/" onClick={() => setIsOpen(false)} className="text-[#1F3E35] font-medium py-2 border-b border-gray-50">Home</Link>
-          <Link to="/shop" onClick={() => setIsOpen(false)} className="text-[#1F3E35] font-medium py-2 border-b border-gray-50">Shop</Link>
+        <div className="md:hidden bg-white border-b border-gray-100 px-6 py-4 flex flex-col gap-4">
+          {/* Mobile-layum active-ah highlight panna idhe NavLink logic thaan */}
+          <NavLink to="/" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>Home</NavLink>
+          <NavLink to="/shop" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>Shop</NavLink>
+          <NavLink to="/category" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>Category</NavLink>
+          <NavLink to="/deals" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>Deals</NavLink>
+          <NavLink to="/about" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>About Luxora</NavLink>
           
-          {/* User Links for Mobile */}
           {user ? (
             <>
-              <Link to={user.isAdmin ? "/admin/dashboard" : "/profile"} onClick={() => setIsOpen(false)} className="text-[#1F3E35] font-bold py-2">
+              <NavLink to={user.isAdmin ? "/admin/dashboard" : "/profile"} onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>
                 {user.isAdmin ? "Dashboard" : "My Profile"}
-              </Link>
-              <button onClick={() => { logout(); setIsOpen(false); }} className="text-red-600 font-bold text-left py-2">
-                Logout
-              </button>
+              </NavLink>
+              <button onClick={() => { logout(); setIsOpen(false); }} className="text-red-600 font-bold text-left">Logout</button>
             </>
           ) : (
-            <Link to="/login" onClick={() => setIsOpen(false)} className="text-[#1F3E35] font-bold py-2">Login</Link>
+            <NavLink to="/login" onClick={() => setIsOpen(false)} className={({ isActive }) => isActive ? "text-amber-600 font-bold" : "text-[#1F3E35]"}>Login</NavLink>
           )}
         </div>
       )}
