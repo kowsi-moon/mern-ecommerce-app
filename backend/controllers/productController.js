@@ -10,24 +10,22 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// 2. Get single product by ID (Indha function missing-ah irundhadhu, adhaan error)
+// 2. Get single product by ID
 exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 // 3. Add product
 exports.addProduct = async (req, res) => {
   try {
-    const { name, price, category, stock, imageUrl, description } = req.body;
+    // isBestSeller-ah destructure pannanum
+    const { name, price, category, stock, imageUrl, description, isBestSeller } = req.body;
     
     const newProduct = new Product({
       name,
@@ -35,7 +33,8 @@ exports.addProduct = async (req, res) => {
       category,
       stock,
       imageUrl,
-      description
+      description,
+      isBestSeller: isBestSeller || false // Indha line dhaan mukkiyam
     });
 
     const savedProduct = await newProduct.save();
@@ -45,11 +44,12 @@ exports.addProduct = async (req, res) => {
   }
 };
 
-// 4. Update product (Strictly Fixed for Stock & Image)
+// 4. Update product
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, category, stock, imageUrl, description } = req.body;
+    // isBestSeller-ah req.body-la irundhu edukanum
+    const { name, price, category, stock, imageUrl, description, isBestSeller } = req.body;
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
@@ -59,7 +59,8 @@ exports.updateProduct = async (req, res) => {
         category, 
         stock, 
         imageUrl, 
-        description 
+        description,
+        isBestSeller // Indha field add panna dhaan DB-la maarum
       },
       { new: true, runValidators: true }
     );
@@ -79,12 +80,8 @@ exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedProduct = await Product.findByIdAndDelete(id);
-
-    if (!deletedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.json({ message: "Product deleted successfully", product: deletedProduct });
+    if (!deletedProduct) return res.status(404).json({ message: "Product not found" });
+    res.json({ message: "Product deleted successfully" });
   } catch (err) {
     res.status(400).json({ message: "Error deleting product", error: err.message });
   }

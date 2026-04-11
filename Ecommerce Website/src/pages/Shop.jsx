@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FiSearch } from 'react-icons/fi';
 import { ChevronLeft, ChevronRight } from 'lucide-react'; 
 
@@ -8,9 +8,21 @@ const Shop = ({ products = [] }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const productsPerPage = 12; 
-  const categories = ['All', 'Electronics', 'Clothing', 'Home & Kitchen', 'Sports', 'Books', 'Accessories', "Gadgets",];
+  const categories = ['All', 'Electronics', 'Clothing', 'Home & Kitchen', 'Sports', 'Books', 'Accessories', 'Gadgets'];
+
+  // --- SYNC CATEGORY FROM HOME PAGE ---
+  useEffect(() => {
+   
+    if (location.state?.selectedCategory) {
+      setSelectedCategory(location.state.selectedCategory);
+      setCurrentPage(1);
+    
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const getImageUrl = (path) => {
     if (!path) return 'https://placehold.co/400x500?text=No+Image';
@@ -21,10 +33,16 @@ const Shop = ({ products = [] }) => {
     return `http://localhost:5000/${finalPath}`;
   };
 
-  // Filter Logic
+  // --- IMPROVED FILTER LOGIC (Case Insensitive & Trimmed) ---
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+    
+
+    const productCat = product.category?.trim().toLowerCase();
+    const selectedCat = selectedCategory.trim().toLowerCase();
+
+    const matchesCategory = selectedCategory === 'All' || productCat === selectedCat;
+    
     return matchesSearch && matchesCategory;
   });
 
@@ -55,7 +73,7 @@ const Shop = ({ products = [] }) => {
                   setCurrentPage(1); 
                 }}
                 className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
-                  selectedCategory === cat 
+                  selectedCategory.toLowerCase() === cat.toLowerCase() 
                   ? 'bg-[#1F3E35] text-white shadow-lg' 
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
@@ -79,14 +97,10 @@ const Shop = ({ products = [] }) => {
           </div>
         </div>
 
-        
-
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 mb-16">
-          {currentProducts.map((product) => {
-            const finalImage = getImageUrl(product.imageUrl || product.image);
-
-            return (
+          {currentProducts.length > 0 ? (
+            currentProducts.map((product) => (
               <div 
                 key={product._id} 
                 className="group cursor-pointer flex flex-col"
@@ -94,14 +108,10 @@ const Shop = ({ products = [] }) => {
               >
                 <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#F3F3F3] mb-5">
                   <img 
-                    src={finalImage} 
+                    src={getImageUrl(product.imageUrl || product.image)} 
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    onError={(e) => { 
-                      if (e.target.src !== 'https://placehold.co/400x500?text=Error') {
-                        e.target.src = 'https://placehold.co/400x500?text=Error';
-                      }
-                    }}
+                    onError={(e) => { e.target.src = 'https://placehold.co/400x500?text=Error'; }}
                   />
                   <div className="absolute bottom-4 right-4 bg-[#1F3E35] text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 shadow-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -114,11 +124,21 @@ const Shop = ({ products = [] }) => {
                   <p className="text-[#1F3E35] font-bold text-lg mt-2">₹{product.price?.toLocaleString('en-IN')}</p>
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <div className="col-span-full text-center py-20">
+              <p className="text-gray-400 text-lg">No products found for "{selectedCategory}"</p>
+              <button 
+                onClick={() => setSelectedCategory('All')}
+                className="mt-4 text-[#1F3E35] font-bold border-b border-[#1F3E35]"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* --- PAGINATION CONTROLS --- */}
+        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-4 mt-12 border-t border-gray-100 pt-10">
             <button
