@@ -48,6 +48,12 @@ const Home = () => {
 
   const displayedProducts = products.slice(0, 8);
 
+  // --- FIX 2: Function to go to TOP of Shop Page ---
+  const handleShopRedirect = () => {
+    window.scrollTo(0, 0); // Force scroll to top
+    navigate('/shop');     // Move to shop page
+  };
+
   return (
     <div className="bg-[#FDFBF7] overflow-x-hidden" style={{ fontFamily: "'Montserrat', sans-serif" }}>
       
@@ -66,19 +72,24 @@ const Home = () => {
             Curated Products for <br />
             <span className="italic font-light text-[#EAB308]">Luxurious</span> Living
           </h1>
+          
+          {/* FIX 1: Changed from scrollIntoView to navigate to Gallery page */}
           <button 
-            onClick={() => document.getElementById('carousel-section').scrollIntoView({ behavior: 'smooth' })}
-            className="bg-[#EAB308] text-[#1F3E35] px-12 py-4 rounded-sm font-bold text-[11px] uppercase tracking-[4px] hover:bg-white transition-all duration-500 shadow-2xl"
-          >
-            Explore Collection →
-          </button>
+  onClick={() => {
+    const section = document.getElementById("products-section");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  }}
+  className="bg-[#EAB308] text-[#1F3E35] px-12 py-4 rounded-sm font-bold text-[11px] uppercase tracking-[4px] hover:bg-white transition-all duration-500 shadow-2xl"
+>
+  Explore Collection →
+</button>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-[#FDFBF7] z-30" style={{ clipPath: 'polygon(0 60%, 100% 0, 100% 100%, 0 100%)' }}></div>
       </section>
 
-      
-
-      {/* --- Section 3: High-Impact Gallery (Fixed Visuals) --- */}
+      {/* --- Section 3: High-Impact Gallery --- */}
       <section id="products-section" className="py-20 px-4 md:px-10 w-full">
         <div className="max-w-[1400px] mx-auto">
           <div className="flex justify-between items-end mb-12 border-b border-gray-100 pb-8">
@@ -98,17 +109,18 @@ const Home = () => {
               {displayedProducts.map(product => (
                 <div 
                   key={product._id} 
-                  onClick={() => navigate(`/product/${product._id}`)} 
+           onClick={() => {
+  window.scrollTo(0, 0);
+  navigate(`/product/${product._id}`);
+}}
                   className="cursor-pointer group flex flex-col transition-all duration-500"
                 >
-                  {/* FIX: Removed 'p-3', changed 'object-contain' to 'object-cover', and updated aspect ratio to 4/5 */}
                   <div className="relative aspect-[4/5] overflow-hidden mb-4 bg-[#F9F7F2] rounded-sm">
                     <img 
                       src={product.imageUrl} 
                       alt={product.name} 
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                     />
-                    {/* Dark overlay on hover for a premium feel */}
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="bg-white px-5 py-2.5 text-[9px] uppercase tracking-[3px] font-bold text-[#1F3E35] shadow-xl">
                         View Product
@@ -129,6 +141,7 @@ const Home = () => {
           )}
         </div>
       </section>
+
       {/* --- Section 2: Slim Banner Slider --- */}
       <section id="carousel-section" className="relative w-full py-8 bg-[#FDFBF7]">
         <div className="max-w-[1400px] mx-auto h-[250px] md:h-[380px] overflow-hidden relative group shadow-lg rounded-sm">
@@ -142,14 +155,18 @@ const Home = () => {
                 <span className="text-[#EAB308] text-[10px] font-bold tracking-[5px] mb-2 uppercase">{slide.title}</span>
                 <h2 className="text-3xl md:text-5xl font-bold text-white mb-2">{slide.offer}</h2>
                 <p className="text-gray-300 text-xs md:text-sm max-w-md mb-6 line-clamp-2">{slide.desc}</p>
-                <button onClick={() => navigate('/shop')} className="w-fit bg-[#2563EB] text-white px-8 py-2.5 rounded-full font-bold text-[10px] hover:bg-blue-600 transition-all uppercase tracking-wider">
+                
+                {/* FIX 2: Added handleShopRedirect to ensure it starts at the top */}
+                <button 
+                  onClick={handleShopRedirect} 
+                  className="w-fit bg-[#2563EB] text-white px-8 py-2.5 rounded-full font-bold text-[10px] hover:bg-blue-600 transition-all uppercase tracking-wider"
+                >
                   Shop Now
                 </button>
               </div>
             </div>
           ))}
 
-          {/* Navigation Arrows */}
           <button 
             onClick={() => setActiveSlide(activeSlide === 0 ? carouselData.length - 1 : activeSlide - 1)}
             className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 hover:bg-black/70 text-white rounded-full transition-all"

@@ -50,10 +50,13 @@ const Deal = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
         {deals.map((product) => (
           <div 
-            key={product._id} 
-            onClick={() => navigate(`/product/${product._id}`)} // Navigate to details
-            className="group cursor-pointer relative bg-white border border-gray-50 rounded-[50px] overflow-hidden hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-700"
-          >
+  key={product._id} 
+  onClick={() => {
+    window.scrollTo(0, 0);
+    navigate(`/product/${product._id}`);
+  }}
+  className="group cursor-pointer relative bg-white border border-gray-50 rounded-[50px] overflow-hidden hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-700"
+>
             
             <div className="absolute top-8 left-8 z-20">
                <span className="bg-black text-white text-[10px] font-black px-5 py-2 rounded-full uppercase tracking-widest shadow-xl">Best Seller</span>

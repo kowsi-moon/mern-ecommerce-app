@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { FiEdit2, FiUser, FiPackage, FiMapPin, FiCreditCard, FiLock, FiLogOut, FiShoppingCart } from 'react-icons/fi';
+import { FiEdit2, FiUser, FiMapPin, FiCreditCard, FiLock, FiLogOut } from 'react-icons/fi';
 import ManageAddress from './ManageAddress';
 import PaymentMethod from './PaymentMethod';
 import PasswordManager from './PasswordManager';
@@ -23,7 +23,6 @@ const Profile = () => {
 
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Sync context user data to local form state
   useEffect(() => {
     if (user) {
       setFormData({
@@ -41,13 +40,12 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- IMAGE PREVIEW LOGIC ---
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result); // Shows image instantly
+        setPreviewImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -75,49 +73,60 @@ const Profile = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-10 py-10 flex flex-col md:flex-row gap-10 min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 py-6 md:py-10 flex flex-col md:flex-row gap-6 md:gap-10 min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
       
       {/* Sidebar */}
-      <div className="w-full md:w-1/4 flex flex-col gap-3">
+      <div className="w-full md:w-1/4 flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto md:overflow-visible">
         {menuItems.map((item) => (
           <button
             key={item.name}
-            onClick={() => item.name === 'Logout' ? logout() : setActiveTab(item.name)}
-            className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all ${
+            onClick={() => {
+              if (item.name === 'Logout') {
+                const confirmLogout = window.confirm("Are you sure you want to logout?");
+                if (confirmLogout) {
+                  logout();
+                  navigate('/');
+                }
+              } else {
+                setActiveTab(item.name);
+              }
+            }}
+            className={`flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 rounded-xl font-semibold whitespace-nowrap transition-all ${
               activeTab === item.name && item.name !== 'Logout'
                 ? 'bg-[#FFC107] text-[#1F3E35] shadow-lg scale-105' 
                 : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700 hover:bg-gray-50'
-            } ${item.name === 'Logout' ? 'text-red-500 mt-5 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
+            } ${item.name === 'Logout' ? 'text-red-500 md:mt-5 hover:bg-red-50 dark:hover:bg-red-900/20' : ''}`}
           >
             {item.icon} {item.name}
           </button>
         ))}
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1">
         
-        {/* TAB 1: PERSONAL INFORMATION */}
         {activeTab === 'Personal Information' && (
-          <div className="max-w-2xl animate-fade-in">
-            {/* Avatar Section */}
-            <div className="relative w-32 h-32 mb-10 group">
+          <div className="max-w-2xl animate-fade-in mx-auto md:mx-0">
+            
+            {/* Avatar */}
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-8 md:mb-10 group">
               <div className="w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 {previewImage ? (
                   <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <FiUser size={50} className="text-gray-300" />
+                  <FiUser size={40} className="text-gray-300" />
                 )}
               </div>
               
-              <label htmlFor="fileInput" className="absolute bottom-1 right-1 bg-[#1F3E35] text-white p-2.5 rounded-full cursor-pointer border-2 border-white dark:border-gray-900 hover:bg-green-700 transition-colors shadow-md">
-                <FiEdit2 size={16} />
+              <label htmlFor="fileInput" className="absolute bottom-1 right-1 bg-[#1F3E35] text-white p-2 rounded-full cursor-pointer border-2 border-white dark:border-gray-900">
+                <FiEdit2 size={14} />
                 <input type="file" id="fileInput" className="hidden" accept="image/*" onChange={handleImageChange} />
               </label>
             </div>
 
-            {/* Profile Form */}
-            <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Form */}
+            <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold dark:text-gray-300">First Name *</label>
                 <input 
@@ -125,9 +134,10 @@ const Profile = () => {
                   name="firstName" 
                   value={formData.firstName} 
                   onChange={handleChange} 
-                  className="p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl dark:text-white focus:ring-2 focus:ring-amber-400 outline-none" 
+                  className="p-3 md:p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl dark:text-white outline-none" 
                 />
               </div>
+
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold dark:text-gray-300">Last Name *</label>
                 <input 
@@ -135,9 +145,10 @@ const Profile = () => {
                   name="lastName" 
                   value={formData.lastName} 
                   onChange={handleChange} 
-                  className="p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl dark:text-white focus:ring-2 focus:ring-amber-400 outline-none" 
+                  className="p-3 md:p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl dark:text-white outline-none" 
                 />
               </div>
+
               <div className="flex flex-col gap-2 md:col-span-2">
                 <label className="text-sm font-bold dark:text-gray-300">Email *</label>
                 <input 
@@ -145,9 +156,10 @@ const Profile = () => {
                   name="email" 
                   value={formData.email} 
                   readOnly 
-                  className="p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-gray-400 outline-none cursor-not-allowed" 
+                  className="p-3 md:p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 cursor-not-allowed" 
                 />
               </div>
+
               <div className="flex flex-col gap-2 md:col-span-2">
                 <label className="text-sm font-bold dark:text-gray-300">Phone *</label>
                 <input 
@@ -155,40 +167,34 @@ const Profile = () => {
                   name="phone" 
                   value={formData.phone} 
                   onChange={handleChange} 
-                  placeholder="+0123-456-789" 
-                  className="p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl dark:text-white focus:ring-2 focus:ring-amber-400 outline-none" 
+                  className="p-3 md:p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl dark:text-white outline-none" 
                 />
               </div>
+
               <div className="flex flex-col gap-2 md:col-span-2">
                 <label className="text-sm font-bold dark:text-gray-300">Gender *</label>
                 <select 
                   name="gender" 
                   value={formData.gender} 
                   onChange={handleChange} 
-                  className="p-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl dark:text-white outline-none focus:ring-2 focus:ring-amber-400"
+                  className="p-3 md:p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl dark:text-white"
                 >
                   <option value="Female">Female</option>
                   <option value="Male">Male</option>
                 </select>
               </div>
 
-              <button type="submit" className="mt-4 bg-[#1F3E35] text-white px-10 py-4 rounded-full font-bold hover:bg-green-900 transition-all w-fit shadow-lg">
+              <button type="submit" className="mt-4 bg-[#1F3E35] text-white px-6 md:px-10 py-3 md:py-4 rounded-full font-bold w-full sm:w-fit">
                 Update Changes
               </button>
+
             </form>
           </div>
         )}
 
-        {/* TAB 2: MANAGE ADDRESS */}
-        {activeTab === 'Manage Address' && (
-          <div className="animate-fade-in">
-            <ManageAddress />
-          </div>
-        )}
-
-{activeTab === 'Payment Method' && <PaymentMethod />}
- {activeTab === 'Password Manager' && <PasswordManager />}     
-
+        {activeTab === 'Manage Address' && <ManageAddress />}
+        {activeTab === 'Payment Method' && <PaymentMethod />}
+        {activeTab === 'Password Manager' && <PasswordManager />}
       </div>
     </div>
   );
