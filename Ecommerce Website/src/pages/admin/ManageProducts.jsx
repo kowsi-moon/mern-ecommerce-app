@@ -106,7 +106,7 @@ const ManageProducts = () => {
                       <FiEdit />
                     </button>
 
-                    {/* ✅ FIXED DELETE BUTTON */}
+                    {/*  FIXED DELETE BUTTON */}
                     <button 
                       onClick={() => handleDelete(p._id)} 
                       className="text-red-500 hover:bg-red-50 p-2 rounded-full"

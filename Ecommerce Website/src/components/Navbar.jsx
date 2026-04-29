@@ -7,7 +7,6 @@ import { useCart } from '../context/CartContext';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-
   const context = useCart();
   const cart = context?.cart || [];
   const cartItemCount = cart.reduce((total, item) => total + (item.quantity || 0), 0);
